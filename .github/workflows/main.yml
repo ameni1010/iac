@@ -20,12 +20,9 @@ jobs:
       - name: Configure Terraform to Skip Signature Check
         run: |
           echo '
-          # Cette ligne est souvent suffisante pour contourner les problèmes de registre/signature
+          # Configure explicitement l'installation du fournisseur pour résoudre l'erreur PGP expirée
           provider_installation {
-            direct {
-              exclude = ["*/*/*"]
-              include = ["kreuzwerker/docker"]
-            }
+            direct {}
           }
           ' > $HOME/.terraformrc
       - name: Terraform Init
