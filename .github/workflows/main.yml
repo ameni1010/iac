@@ -20,7 +20,7 @@ jobs:
       - name: Terraform Init
         run: |
           rm -rf .terraform/ .terraform.lock.hcl
-          terraform init -input=false -verify-plugins=false
+          terraform init -input=false -upgrade
 
       - name: Terraform Plan
         run: terraform plan
