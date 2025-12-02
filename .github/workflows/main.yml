@@ -17,23 +17,28 @@ jobs:
         with:
           terraform_version: 1.6.0
 
-      - name: Configure Terraform to Skip Signature Check
+      - name: Configure Terraform to Skip Signature Check (Final Override)
         run: |
-          # The 'provider_installation { direct {} }' block is crucial for
-          # instructing Terraform to use the official registry path AND bypass
-          # known issues with expired PGP keys for community providers.
+          # This creates a development override for the kreuzwerker/docker provider.
+          # It tells Terraform to trust this specific provider implicitly, bypassing
+          # the expired PGP key check.
           echo '
           provider_installation {
-            direct {}
+            direct {
+              include = ["kreuzwerker/docker"]
+            }
+            dev_overrides {
+              "kreuzwerker/docker" = "$HOME/.terraform.d/plugins/registry.terraform.io/kreuzwerker/docker"
+            }
           }
           ' > $HOME/.terraformrc
-
       - name: Terraform Init
         run: |
           # The rm -rf is good practice
           rm -rf .terraform/ .terraform.lock.hcl
-          # Run init after creating the configuration file
-          terraform init -input=false
+          # This time, we also add the -reconfigure flag to ensure Terraform
+          # re-reads the new .terraformrc file settings completely.
+          terraform init -input=false -reconfigure
       - name: Terraform Plan
         run: terraform plan
 
