@@ -15,12 +15,27 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0  # adapte si besoin
+          terraform_version: 1.6.0 # adapte si besoin
+
+      - name: Configure Terraform to Skip Signature Check
+        run: |
+          echo '
+          provider_installation {
+            # Disables signature verification for community providers
+            # Required when keys expire, which is the case for kreuzwerker/docker 3.x.x series
+            # WARNING: Use only when strictly necessary and accepting the security risk.
+            filesystem_mirror {
+              path    = "$HOME/.terraform.d/plugins"
+            }
+            direct {}
+          }
+          ' > $HOME/.terraformrc
 
       - name: Terraform Init
         run: |
           rm -rf .terraform/ .terraform.lock.hcl
-          terraform init -input=false -upgrade
+          # L'option -upgrade n'est plus nécessaire car on force l'installation
+          terraform init -input=false 
 
       - name: Terraform Plan
         run: terraform plan
