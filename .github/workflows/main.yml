@@ -15,14 +15,14 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0 # adapte si besoin
+          terraform_version: 1.6.0
 
       - name: Configure Terraform to Skip Signature Check
         run: |
+          # Crée un fichier de configuration pour forcer l'installation
+          # et résoudre l'erreur PGP expirée sans provoquer d'erreurs de recherche.
           echo '
-          # Configuration pour résoudre les problèmes de clé PGP expirée pour les fournisseurs non-officiels.
           provider_installation {
-            # Indique explicitement à Terraform de chercher sur le registre officiel.
             direct {}
           }
           ' > $HOME/.terraformrc
@@ -30,12 +30,11 @@ jobs:
       - name: Terraform Init
         run: |
           rm -rf .terraform/ .terraform.lock.hcl
-          terraform init -input=false
+          terraform init -input=false 
 
       - name: Terraform Plan
         run: terraform plan
 
       - name: Terraform Apply
-        if: success()    # n'exécute que si le plan a réussi
+        if: success()
         run: terraform apply -auto-approve
-
