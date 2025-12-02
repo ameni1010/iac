@@ -1,0 +1,37 @@
+FROM alpine:latest
+
+# Installer Nginx
+RUN apk add --no-cache nginx
+
+# Supprimer config par défaut
+RUN rm -rf /etc/nginx/conf.d/*
+
+# Créer dossier html et index.html
+RUN mkdir -p /usr/share/nginx/html
+RUN echo "<h1>Application Deployed via Terraform IaC!</h1>" > /usr/share/nginx/html/index.html
+
+# Créer nginx.conf minimal avec heredoc
+RUN cat << 'EOF' > /etc/nginx/nginx.conf
+events { 
+    worker_connections 1024; 
+}
+
+http {
+    server {
+        listen 80;
+        server_name localhost;
+        root /usr/share/nginx/html;
+        index index.html;
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+}
+EOF
+
+# Exposer le port 80
+EXPOSE 80
+
+# Lancer Nginx au premier plan
+CMD ["nginx", "-g", "daemon off;"]
+
