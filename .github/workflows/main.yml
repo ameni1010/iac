@@ -20,16 +20,17 @@ jobs:
       - name: Configure Terraform to Skip Signature Check
         run: |
           echo '
-          # Configure explicitement l'installation du fournisseur pour résoudre l'erreur PGP expirée
+          # Configuration pour résoudre les problèmes de clé PGP expirée pour les fournisseurs non-officiels.
           provider_installation {
+            # Indique explicitement à Terraform de chercher sur le registre officiel.
             direct {}
           }
           ' > $HOME/.terraformrc
+
       - name: Terraform Init
         run: |
           rm -rf .terraform/ .terraform.lock.hcl
-          # L'option -upgrade n'est plus nécessaire car on force l'installation
-          terraform init -input=false 
+          terraform init -input=false
 
       - name: Terraform Plan
         run: terraform plan
