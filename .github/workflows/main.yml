@@ -1,6 +1,5 @@
-name: Terraform CI/CD Pipeline
+name: Terraform CI/CD
 
-# S'exécute à chaque push sur main
 on:
   push:
     branches:
@@ -8,38 +7,25 @@ on:
 
 jobs:
   terraform:
-    name: Terraform Deployment
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout du repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Installer Terraform
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0
+          terraform_version: 1.6.0  # adapte si besoin
 
-      # 3️⃣ Initialiser Terraform sans vérification du plugin
       - name: Terraform Init
         run: |
-          rm -rf .terraform/                # Supprimer ancien état
-          rm -f .terraform.lock.hcl
-          terraform init -input=false
+          rm -rf .terraform/ .terraform.lock.hcl
+          terraform init -input=false -verify-plugins=false
 
-      # 4️⃣ Terraform Plan
       - name: Terraform Plan
-        id: plan
-        run: terraform plan -input=false -out=tfplan
+        run: terraform plan
 
-      # 5️⃣ Terraform Apply (uniquement si Plan réussi)
       - name: Terraform Apply
-        if: ${{ success() }}
-        run: terraform apply -input=false -auto-approve tfplan
-
-      # 6️⃣ Outputs pour vérification
-      - name: Terraform Output
-        run: terraform output
+        if: success()    # n'exécute que si le plan a réussi
+        run: terraform apply -auto-approve
 
