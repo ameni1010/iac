@@ -19,8 +19,9 @@ jobs:
 
       - name: Configure Terraform to Skip Signature Check
         run: |
-          # Crée un fichier de configuration pour forcer l'installation
-          # et résoudre l'erreur PGP expirée sans provoquer d'erreurs de recherche.
+          # The 'provider_installation { direct {} }' block is crucial for
+          # instructing Terraform to use the official registry path AND bypass
+          # known issues with expired PGP keys for community providers.
           echo '
           provider_installation {
             direct {}
@@ -29,9 +30,10 @@ jobs:
 
       - name: Terraform Init
         run: |
+          # The rm -rf is good practice
           rm -rf .terraform/ .terraform.lock.hcl
-          terraform init -input=false 
-
+          # Run init after creating the configuration file
+          terraform init -input=false
       - name: Terraform Plan
         run: terraform plan
 
