@@ -17,27 +17,23 @@ jobs:
         with:
           terraform_version: 1.6.0
 
-      - name: Configure Terraform to Skip Signature Check (Final Override)
+      - name: Configure Terraform to Skip Signature Check (Final Corrected Order)
         run: |
-          # This creates a development override for the kreuzwerker/docker provider.
-          # It tells Terraform to trust this specific provider implicitly, bypassing
-          # the expired PGP key check.
+          # The dev_overrides block MUST be listed FIRST.
           echo '
           provider_installation {
-            direct {
-              include = ["kreuzwerker/docker"]
-            }
             dev_overrides {
               "kreuzwerker/docker" = "$HOME/.terraform.d/plugins/registry.terraform.io/kreuzwerker/docker"
+            }
+            direct {
+              include = ["kreuzwerker/docker"]
             }
           }
           ' > $HOME/.terraformrc
       - name: Terraform Init
         run: |
-          # The rm -rf is good practice
           rm -rf .terraform/ .terraform.lock.hcl
-          # This time, we also add the -reconfigure flag to ensure Terraform
-          # re-reads the new .terraformrc file settings completely.
+          # Adding -reconfigure ensures the new .terraformrc is fully read and applied.
           terraform init -input=false -reconfigure
       - name: Terraform Plan
         run: terraform plan
